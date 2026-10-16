@@ -19,7 +19,7 @@ type View =
   | "devices" | "help" | "privacy-settings" | "accounts" | "policy" | "terms" | "verify";
 
 export const Route = createFileRoute("/settings")({
-  validateSearch: (s: Record<string, unknown>): { v?: View } => ({ v: (s.v as View) || undefined }),
+  validateSearch: (s: Record<string, unknown>): { v?: View } => ({ v: (s["v"] as View) || undefined }),
   head: () => ({
     meta: [
       { title: "Settings · SAC Community" },
@@ -345,6 +345,7 @@ function Devices() {
     { id: "geolocation", label: "Location" }, { id: "notifications", label: "Notifications" },
   ];
   useEffect(() => {
+    void 0;
     items.forEach(async (i) => {
       try {
         const r = await navigator.permissions.query({ name: i.id as PermissionName });
@@ -433,7 +434,7 @@ function Activity() {
     queryFn: async () => {
       const [{ data: likes }, { data: comments }, { data: posts }] = await Promise.all([
         supabase.from("likes").select("content_id,created_at,content(title)").eq("user_id", userId!).order("created_at", { ascending: false }).limit(20),
-        supabase.from("comments").select("*").eq("user_id", userId!).order("created_at", { ascending: false }).limit(20),
+        supabase.from("comments").select("*").eq("author_id", userId!).order("created_at", { ascending: false }).limit(20),
         supabase.from("content").select("id,title,type,created_at").eq("author_id", userId!).order("created_at", { ascending: false }).limit(20),
       ]);
       type Item = { at: string; text: string; id: string };
