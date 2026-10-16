@@ -6,7 +6,7 @@ import {
   FileText, ScrollText, LogOut, BadgeCheck, ChevronRight, ChevronLeft, Users, Eye, TrendingUp, Search, X,
 } from "lucide-react";
 import { toast } from "sonner";
-import { RequireAuth, useAuth } from "@/lib/auth";
+import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
@@ -30,11 +30,7 @@ export const Route = createFileRoute("/settings")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: () => (
-    <RequireAuth>
-      <SettingsPage />
-    </RequireAuth>
-  ),
+  component: SettingsPage,
 });
 
 const TITLES: Record<View, string> = {
@@ -65,6 +61,7 @@ function useLocalFlag(key: string, userId: string | null, def = false) {
 function SettingsPage() {
   const { v = "home" } = Route.useSearch();
   const navigate = useNavigate();
+  const { userId } = useAuth();
   const go = (view: View) => navigate({ to: "/settings", search: view === "home" ? {} : { v: view } });
 
   return (
@@ -77,7 +74,8 @@ function SettingsPage() {
         )}
         <h1 className="text-xl font-black">{TITLES[v]}</h1>
       </div>
-      {v === "home" && <Home go={go} />}
+      {v === "home" ? <Home go={go} /> : !userId && !["help","policy","terms","devices"].includes(v) ? <SignInNote /> : null}
+      {userId && <>
       {v === "insights" && <Insights />}
       {v === "privacy" && <Privacy />}
       {v === "report" && <Report />}
@@ -91,7 +89,8 @@ function SettingsPage() {
       {v === "accounts" && <Accounts />}
       {v === "policy" && <Doc kind="policy" />}
       {v === "terms" && <Doc kind="terms" />}
-      {v === "verify" && <Verify />}
+      {v === "verify" && <Verify />}</>}
+      {!userId && v === "help" && <Help />}{!userId && v === "devices" && <Devices />}{!userId && v === "policy" && <Doc kind="policy" />}{!userId && v === "terms" && <Doc kind="terms" />}
     </div>
   );
 }
@@ -590,6 +589,15 @@ function Doc({ kind }: { kind: "policy" | "terms" }) {
         </div>
       ))}
       <p className="text-xs text-muted-foreground">Last updated {new Date().getFullYear()}.</p>
+    </div>
+  );
+}
+
+function SignInNote() {
+  return (
+    <div className="rounded-2xl border border-border bg-card p-6 text-center">
+      <p className="text-sm text-muted-foreground">Sign in to use this setting.</p>
+      <Button asChild className="mt-3"><Link to="/auth">Sign in</Link></Button>
     </div>
   );
 }
