@@ -73,7 +73,7 @@ export function Header() {
             </div>
           </>
         ) : (
-          <Link to="/auth" className="rounded-full bg-gradient-primary px-4 py-2 text-sm font-semibold text-primary-foreground">Sign in</Link>
+          <div className="flex items-center gap-1"><Link to="/settings" className={linkCls} aria-label="Settings"><Settings className="h-5 w-5" /></Link><Link to="/auth" className="rounded-full bg-gradient-primary px-4 py-2 text-sm font-semibold text-primary-foreground">Sign in</Link></div>
         )}
       </div>
       {userId && (
